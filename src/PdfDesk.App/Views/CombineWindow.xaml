@@ -1,0 +1,99 @@
+<Window x:Class="PdfDesk.App.Views.CombineWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Combine files" Width="720" Height="520" MinWidth="520" MinHeight="360"
+        WindowStartupLocation="CenterOwner" ShowInTaskbar="False" ResizeMode="CanResizeWithGrip"
+        Background="{StaticResource ChromeBrush}">
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <DockPanel>
+            <TextBlock Text="Folder:" VerticalAlignment="Center" Margin="0,0,8,0" />
+            <Button DockPanel.Dock="Right" Content="Browse…" Padding="12,3" Margin="8,0,0,0" Click="Browse_Click" />
+            <TextBox Text="{Binding Folder, UpdateSourceTrigger=LostFocus}" VerticalContentAlignment="Center" Padding="4,3"
+                     AutomationProperties.Name="Folder" KeyDown="Folder_KeyDown" />
+        </DockPanel>
+
+        <WrapPanel Grid.Row="1" Margin="0,10">
+            <CheckBox Content="Include subfolders" IsChecked="{Binding IncludeSubfolders}" Margin="0,0,24,0" VerticalAlignment="Center" />
+            <TextBlock Text="Sort:" Margin="0,0,8,0" VerticalAlignment="Center" />
+            <RadioButton Content="Name" IsChecked="{Binding SortByName}" Margin="0,0,12,0" VerticalAlignment="Center" />
+            <RadioButton Content="Date" IsChecked="{Binding SortByDate}" Margin="0,0,12,0" VerticalAlignment="Center" />
+            <RadioButton Content="Manual" IsChecked="{Binding SortManual}" VerticalAlignment="Center"
+                         ToolTip="Drag files or use the arrow buttons" />
+        </WrapPanel>
+
+        <Grid Grid.Row="2">
+            <ListView x:Name="List" ItemsSource="{Binding Items}" SelectedItem="{Binding SelectedItem}"
+                      AllowDrop="True" SelectionMode="Single"
+                      PreviewMouseLeftButtonDown="List_PreviewMouseLeftButtonDown" PreviewMouseMove="List_PreviewMouseMove"
+                      DragOver="List_DragOver" Drop="List_Drop" AutomationProperties.Name="Files to combine">
+                <ListView.View>
+                    <GridView>
+                        <GridViewColumn Width="36">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <CheckBox IsChecked="{Binding IsIncluded}" IsEnabled="{Binding IsUsable}"
+                                              AutomationProperties.Name="{Binding FileName}" />
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Header="File" Width="280">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding FileName}" />
+                                        <TextBlock Text="{Binding RelativeFolder}" FontSize="11" Foreground="{StaticResource SubtleTextBrush}">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Style.Triggers>
+                                                        <Trigger Property="Text" Value="">
+                                                            <Setter Property="Visibility" Value="Collapsed" />
+                                                        </Trigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                        <TextBlock Text="{Binding Problem}" FontSize="11" Foreground="#B00020">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Style.Triggers>
+                                                        <Trigger Property="Text" Value="{x:Null}">
+                                                            <Setter Property="Visibility" Value="Collapsed" />
+                                                        </Trigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Header="Pages" Width="60" DisplayMemberBinding="{Binding Pages}" />
+                        <GridViewColumn Header="Size" Width="80" DisplayMemberBinding="{Binding Size}" />
+                        <GridViewColumn Header="Modified" Width="130" DisplayMemberBinding="{Binding Modified}" />
+                    </GridView>
+                </ListView.View>
+            </ListView>
+            <TextBlock Text="{Binding Message}" HorizontalAlignment="Center" VerticalAlignment="Center"
+                       Foreground="{StaticResource SubtleTextBrush}" IsHitTestVisible="False" />
+        </Grid>
+
+        <DockPanel Grid.Row="3" Margin="0,12,0,0">
+            <Button Content="&#xE74A;" Style="{StaticResource ToolBarButton}" Command="{Binding MoveUpCommand}"
+                    ToolTip="Move up" AutomationProperties.Name="Move up" />
+            <Button Content="&#xE74B;" Style="{StaticResource ToolBarButton}" Command="{Binding MoveDownCommand}"
+                    ToolTip="Move down" AutomationProperties.Name="Move down" />
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                <Button Content="Cancel" IsCancel="True" Padding="16,4" Margin="0,0,8,0" />
+                <Button Content="Combine" IsDefault="True" Padding="16,4" Click="Combine_Click" />
+            </StackPanel>
+            <TextBlock Text="{Binding Summary}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,16,0" />
+        </DockPanel>
+    </Grid>
+</Window>

@@ -1,0 +1,344 @@
+<Window x:Class="PdfDesk.App.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:PdfDesk.App.ViewModels"
+        xmlns:local="clr-namespace:PdfDesk.App.Views"
+        Title="{Binding Title}" Width="1200" Height="850" MinWidth="640" MinHeight="400"
+        AllowDrop="True" DragOver="Window_DragOver" Drop="Window_Drop" WindowStartupLocation="CenterScreen"
+        Background="{StaticResource ChromeBrush}" UseLayoutRounding="True">
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
+        <local:PathPartConverter x:Key="FileName" Part="FileName" />
+        <local:PathPartConverter x:Key="FolderName" Part="Folder" />
+
+        <!-- AcroForm field over the page (base-frame points). -->
+        <DataTemplate DataType="{x:Type vm:FieldViewModel}">
+            <Grid Width="{Binding Width}" Height="{Binding Height}" ToolTip="{Binding ToolTip}" IsEnabled="{Binding IsEditable}">
+                <TextBox Text="{Binding Text, UpdateSourceTrigger=LostFocus}" FontFamily="Arial" FontSize="{Binding FontSize}"
+                         AcceptsReturn="{Binding MultiLine}" TextAlignment="{Binding TextAlignment}" Background="#E8F0FC" BorderBrush="#9CB8E0" BorderThickness="0.5"
+                         Padding="1,0" VerticalContentAlignment="Center"
+                         Visibility="{Binding IsText, Converter={StaticResource BoolToVisibility}}"
+                         AutomationProperties.Name="{Binding ToolTip}">
+                    <TextBox.Style>
+                        <Style TargetType="TextBox">
+                            <Setter Property="TextWrapping" Value="NoWrap" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding MultiLine}" Value="True">
+                                    <Setter Property="TextWrapping" Value="Wrap" />
+                                    <Setter Property="VerticalContentAlignment" Value="Top" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBox.Style>
+                </TextBox>
+                <ToggleButton IsChecked="{Binding IsChecked}" Cursor="Hand" Focusable="True"
+                              Visibility="{Binding IsCheckBox, Converter={StaticResource BoolToVisibility}}"
+                              AutomationProperties.Name="{Binding ToolTip}">
+                    <ToggleButton.Template>
+                        <ControlTemplate TargetType="ToggleButton">
+                            <Border Background="#E8F0FC" BorderBrush="#9CB8E0" BorderThickness="0.5">
+                                <Viewbox Margin="1">
+                                    <TextBlock x:Name="Mark" Text="&#xE73E;" FontFamily="{StaticResource IconFont}" Visibility="Hidden" />
+                                </Viewbox>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter TargetName="Mark" Property="Visibility" Value="Visible" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </ToggleButton.Template>
+                </ToggleButton>
+            </Grid>
+        </DataTemplate>
+
+        <!-- Typed text box (base-frame points, rotated around its top-left corner). -->
+        <DataTemplate DataType="{x:Type vm:OverlayViewModel}">
+            <Grid RenderTransformOrigin="0,0">
+                <Grid.RenderTransform>
+                    <RotateTransform Angle="{Binding Angle}" />
+                </Grid.RenderTransform>
+                <Rectangle x:Name="Frame" Margin="-2,-1" Stroke="Transparent" StrokeThickness="0.75" StrokeDashArray="3 2" />
+                <Rectangle x:Name="Tint" Margin="-2,-1" Fill="Transparent" IsHitTestVisible="False" />
+                <!-- TextBox draws its text 2 units in from the left: compensate so it matches the saved PDF. -->
+                <TextBox x:Name="Box" Text="{Binding Text, UpdateSourceTrigger=PropertyChanged}" FontFamily="Arial"
+                         FontSize="{Binding FontSize}" Foreground="{Binding Foreground}" CaretBrush="{Binding Foreground}"
+                         Background="Transparent" BorderThickness="0" Padding="0" Margin="-2,0,-2,0" MinWidth="12"
+                         AcceptsReturn="True" TextWrapping="NoWrap"
+                         TextBlock.LineHeight="{Binding LineHeight}" TextBlock.LineStackingStrategy="BlockLineHeight"
+                         Loaded="Overlay_Loaded" GotKeyboardFocus="Overlay_GotKeyboardFocus"
+                         LostKeyboardFocus="Overlay_LostKeyboardFocus" PreviewKeyDown="Overlay_PreviewKeyDown"
+                         AutomationProperties.Name="Text box" />
+                <!-- Drag handle, shown when selected. -->
+                <Border x:Name="Grip" Width="7" HorizontalAlignment="Left" Margin="-10,-1,0,-1" CornerRadius="2"
+                        Background="{StaticResource AccentBrush}" Cursor="SizeAll" Visibility="Collapsed"
+                        ToolTip="Drag to move"
+                        MouseLeftButtonDown="Grip_MouseLeftButtonDown" MouseMove="Grip_MouseMove" MouseLeftButtonUp="Grip_MouseLeftButtonUp" />
+            </Grid>
+            <DataTemplate.Triggers>
+                <DataTrigger Binding="{Binding IsAnnotation}" Value="True">
+                    <Setter TargetName="Tint" Property="Fill" Value="#30FFC800" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                    <Setter TargetName="Frame" Property="Stroke" Value="{StaticResource AccentBrush}" />
+                    <Setter TargetName="Grip" Property="Visibility" Value="Visible" />
+                </DataTrigger>
+            </DataTemplate.Triggers>
+        </DataTemplate>
+
+        <ItemsPanelTemplate x:Key="CanvasPanel">
+            <Canvas />
+        </ItemsPanelTemplate>
+
+        <Style x:Key="CanvasItem" TargetType="ContentPresenter">
+            <Setter Property="Canvas.Left" Value="{Binding X}" />
+            <Setter Property="Canvas.Top" Value="{Binding Y}" />
+        </Style>
+    </Window.Resources>
+
+    <DockPanel>
+        <!-- Toolbar -->
+        <Border DockPanel.Dock="Top" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1" Padding="6,4">
+            <WrapPanel>
+                <Button Style="{StaticResource ToolBarButton}" Content="&#xE8E5;" Tag="Open" Command="{Binding OpenCommand}" ToolTip="Open (Ctrl+O)" AutomationProperties.Name="Open" />
+                <Button Style="{StaticResource ToolBarButton}" Content="&#xE74E;" Tag="Save" Command="{Binding SaveCommand}" IsEnabled="{Binding HasDocument}" ToolTip="Save (Ctrl+S)" AutomationProperties.Name="Save" />
+                <Button Style="{StaticResource ToolBarButton}" Content="&#xE792;" Command="{Binding SaveAsCommand}" IsEnabled="{Binding HasDocument}" ToolTip="Save as a copy (Ctrl+Shift+S)" AutomationProperties.Name="Save as" />
+                <Rectangle Style="{StaticResource Separator}" />
+                <Button Style="{StaticResource ToolBarButton}" Content="&#xF168;" Tag="Combine…" Command="{Binding CombineCommand}" ToolTip="Combine the PDFs of a folder" AutomationProperties.Name="Combine files" />
+                <Button Style="{StaticResource ToolBarButton}" Content="&#xE8A5;" Command="{Binding InsertPagesCommand}" IsEnabled="{Binding HasDocument}" ToolTip="Insert pages from other PDFs after the selection" AutomationProperties.Name="Insert pages" />
+                <Rectangle Style="{StaticResource Separator}" />
+                <Button Style="{StaticResource ToolBarButton}" Content="&#xE7A7;" Command="{Binding UndoCommand}" IsEnabled="{Binding CanUndo}" ToolTip="Undo (Ctrl+Z)" AutomationProperties.Name="Undo" />
+                <Button Style="{StaticResource ToolBarButton}" Content="&#xE7A6;" Command="{Binding RedoCommand}" IsEnabled="{Binding CanRedo}" ToolTip="Redo (Ctrl+Y)" AutomationProperties.Name="Redo" />
+                <Rectangle Style="{StaticResource Separator}" />
+                <Button Style="{StaticResource ToolBarButton}" Content="&#xE7AD;" Command="{Binding RotateLeftCommand}" IsEnabled="{Binding HasDocument}" ToolTip="Rotate left" AutomationProperties.Name="Rotate left" RenderTransformOrigin="0.5,0.5">
+                    <Button.RenderTransform>
+                        <ScaleTransform ScaleX="-1" />
+                    </Button.RenderTransform>
+                </Button>
+                <Button Style="{StaticResource ToolBarButton}" Content="&#xE7AD;" Command="{Binding RotateRightCommand}" IsEnabled="{Binding HasDocument}" ToolTip="Rotate right" AutomationProperties.Name="Rotate right" />
+                <Button Style="{StaticResource ToolBarButton}" Content="&#xE74A;" Command="{Binding MoveUpCommand}" IsEnabled="{Binding HasDocument}" ToolTip="Move page up (Alt+Up)" AutomationProperties.Name="Move page up" />
+                <Button Style="{StaticResource ToolBarButton}" Content="&#xE74B;" Command="{Binding MoveDownCommand}" IsEnabled="{Binding HasDocument}" ToolTip="Move page down (Alt+Down)" AutomationProperties.Name="Move page down" />
+                <Button Style="{StaticResource ToolBarButton}" Content="&#xE74D;" Command="{Binding DeletePagesCommand}" IsEnabled="{Binding HasDocument}" ToolTip="Delete page (Del)" AutomationProperties.Name="Delete page" />
+                <Rectangle Style="{StaticResource Separator}" />
+                <ToggleButton Style="{StaticResource ToolBarToggle}" Content="&#xE8D2;" Tag="Text" IsChecked="{Binding IsTextTool}" IsEnabled="{Binding HasDocument}"
+                              ToolTip="Text: click on a page and type. Drawn into the page when saved (T)" AutomationProperties.Name="Text tool" />
+                <ToggleButton Style="{StaticResource ToolBarToggle}" Content="&#xE70F;" Tag="Editable text" IsChecked="{Binding IsEditableTextTool}" IsEnabled="{Binding HasDocument}"
+                              ToolTip="Editable text: saved as an annotation other PDF apps can still edit (Shift+T)" AutomationProperties.Name="Editable text tool" />
+
+                <!-- Style of the selected / next text box -->
+                <StackPanel Orientation="Horizontal" Margin="4,0,0,0">
+                    <ComboBox ItemsSource="{Binding FontSizes}" SelectedItem="{Binding CurrentFontSize}" Width="56" VerticalAlignment="Center"
+                              ToolTip="Font size (pt)" AutomationProperties.Name="Font size" />
+                    <ComboBox ItemsSource="{Binding Colors}" SelectedValuePath="Value" SelectedValue="{Binding CurrentColor}" Width="74" Margin="4,0,0,0"
+                              VerticalAlignment="Center" ToolTip="Text color" AutomationProperties.Name="Text color">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <Rectangle Width="10" Height="10" Fill="{Binding Value}" Margin="0,0,6,0" VerticalAlignment="Center" />
+                                    <TextBlock Text="{Binding Key}" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                    <StackPanel Orientation="Horizontal" IsEnabled="{Binding HasSelectedOverlay}">
+                        <Button Style="{StaticResource ToolBarButton}" Content="&#xE787;" Command="{Binding InsertDateCommand}" ToolTip="Insert today's date" AutomationProperties.Name="Insert date" />
+                        <Button Style="{StaticResource ToolBarButton}" Content="&#xE8AB;" Command="{Binding ConvertOverlayCommand}" ToolTip="Switch between drawn-in and editable text" AutomationProperties.Name="Switch text kind" />
+                        <Button Style="{StaticResource ToolBarButton}" Content="&#xE711;" Command="{Binding DeleteOverlayCommand}" ToolTip="Delete text box" AutomationProperties.Name="Delete text box" />
+                    </StackPanel>
+                </StackPanel>
+                <Rectangle Style="{StaticResource Separator}" />
+                <Menu Background="Transparent" VerticalAlignment="Center">
+                    <MenuItem ToolTip="More" AutomationProperties.Name="More" Padding="8,4">
+                        <MenuItem.Header>
+                            <TextBlock Text="&#xE712;" FontFamily="{StaticResource IconFont}" FontSize="16" />
+                        </MenuItem.Header>
+                        <MenuItem Header="Recent files" ItemsSource="{Binding RecentFiles}" Click="Recent_Click" />
+                        <MenuItem Header="Insert pages from PDF…" Command="{Binding InsertPagesCommand}" IsEnabled="{Binding HasDocument}" />
+                        <Separator />
+                        <MenuItem Header="Open in default app" Command="{Binding OpenInDefaultAppCommand}" IsEnabled="{Binding HasDocument}" />
+                        <MenuItem Header="Show in folder" Command="{Binding OpenFolderCommand}" IsEnabled="{Binding HasDocument}" />
+                        <Separator />
+                        <MenuItem Header="Show PdfDesk in &quot;Open with&quot;" IsCheckable="False" IsChecked="{Binding IsOpenWithRegistered, Mode=OneWay}"
+                                  Command="{Binding ToggleOpenWithCommand}" />
+                        <MenuItem Header="Open log folder" Command="{Binding OpenLogFolderCommand}" />
+                    </MenuItem>
+                </Menu>
+            </WrapPanel>
+        </Border>
+
+        <!-- Status bar -->
+        <Border DockPanel.Dock="Bottom" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,1,0,0" Padding="10,3">
+            <DockPanel>
+                <StackPanel Orientation="Horizontal" Visibility="{Binding HasDocument, Converter={StaticResource BoolToVisibility}}">
+                    <TextBlock Text="Page" VerticalAlignment="Center" />
+                    <TextBox x:Name="PageBox" Width="40" Margin="6,0" Padding="2,0" HorizontalContentAlignment="Center"
+                             KeyDown="PageBox_KeyDown" GotKeyboardFocus="PageBox_GotKeyboardFocus" PreviewMouseLeftButtonDown="PageBox_PreviewMouseLeftButtonDown" AutomationProperties.Name="Go to page" />
+                    <TextBlock Text="{Binding Pages.Count, StringFormat='of {0}'}" VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding SourceInfo}" Margin="24,0,0,0" VerticalAlignment="Center" Foreground="{StaticResource SubtleTextBrush}" />
+                </StackPanel>
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" IsEnabled="{Binding HasDocument}">
+                    <Button Style="{StaticResource ToolBarButton}" Content="&#xE71F;" Command="{Binding ZoomOutCommand}" ToolTip="Zoom out (Ctrl+-)" AutomationProperties.Name="Zoom out" />
+                    <Button Content="{Binding ZoomText}" Command="{Binding ZoomActualSizeCommand}" MinWidth="48" Padding="4,0"
+                            Background="Transparent" BorderThickness="0" Focusable="False" Cursor="Hand"
+                            ToolTip="Actual size (Ctrl+0)" AutomationProperties.Name="Actual size" />
+                    <Button Style="{StaticResource ToolBarButton}" Content="&#xE8A3;" Command="{Binding ZoomInCommand}" ToolTip="Zoom in (Ctrl++)" AutomationProperties.Name="Zoom in" />
+                    <Button Style="{StaticResource ToolBarButton}" Content="&#xE9A6;" Command="{Binding FitWidthCommand}" ToolTip="Fit width" AutomationProperties.Name="Fit width" />
+                    <Button Style="{StaticResource ToolBarButton}" Content="&#xE740;" Command="{Binding FitPageCommand}" ToolTip="Fit page" AutomationProperties.Name="Fit page" />
+                </StackPanel>
+                <ProgressBar DockPanel.Dock="Right" Width="80" Height="8" IsIndeterminate="True" VerticalAlignment="Center" Margin="0,0,12,0"
+                             Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibility}}" />
+                <TextBlock Text="{Binding Status}" Margin="24,0" VerticalAlignment="Center" HorizontalAlignment="Right" TextTrimming="CharacterEllipsis" />
+            </DockPanel>
+        </Border>
+
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="160" MinWidth="110" MaxWidth="320" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Thumbnails: click to go to a page, drag to reorder, drop PDFs to insert. -->
+            <ListBox x:Name="Thumbs" ItemsSource="{Binding Pages}" SelectionMode="Extended" AllowDrop="True"
+                     Background="{StaticResource ChromeBrush}" BorderThickness="0"
+                     ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                     VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Standard"
+                     SelectionChanged="Thumbs_SelectionChanged"
+                     PreviewMouseLeftButtonDown="Thumbs_PreviewMouseLeftButtonDown" PreviewMouseMove="Thumbs_PreviewMouseMove"
+                     PreviewMouseLeftButtonUp="Thumbs_PreviewMouseLeftButtonUp"
+                     DragOver="Thumbs_DragOver" DragLeave="Thumbs_DragLeave" Drop="Thumbs_Drop"
+                     AutomationProperties.Name="Pages">
+                <ListBox.ItemContainerStyle>
+                    <Style TargetType="ListBoxItem">
+                        <EventSetter Event="Loaded" Handler="Thumb_Loaded" />
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                        <Setter Property="Padding" Value="0" />
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="ListBoxItem">
+                                    <Border x:Name="Bd" Margin="8,4" Padding="6" CornerRadius="4" Background="Transparent">
+                                        <ContentPresenter />
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="Bd" Property="Background" Value="#E6E6E6" />
+                                        </Trigger>
+                                        <Trigger Property="IsSelected" Value="True">
+                                            <Setter TargetName="Bd" Property="Background" Value="#CCE4F7" />
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </ListBox.ItemContainerStyle>
+                <ListBox.ItemTemplate>
+                    <DataTemplate DataType="{x:Type vm:PageViewModel}">
+                        <StackPanel ToolTip="{Binding ToolTip}">
+                            <Border Height="130">
+                                <Viewbox Stretch="Uniform" StretchDirection="Both">
+                                    <Border x:Name="Paper" Width="{Binding BaseWidth}" Height="{Binding BaseHeight}" Background="White"
+                                            BorderBrush="#B0B0B0" BorderThickness="2">
+                                        <Border.LayoutTransform>
+                                            <RotateTransform Angle="{Binding Angle}" />
+                                        </Border.LayoutTransform>
+                                        <Image Source="{Binding Thumbnail}" Stretch="Fill" />
+                                    </Border>
+                                </Viewbox>
+                            </Border>
+                            <TextBlock x:Name="Number" Text="{Binding Number}" HorizontalAlignment="Center" Margin="0,4,0,0" />
+                        </StackPanel>
+                        <DataTemplate.Triggers>
+                            <DataTrigger Binding="{Binding IsCurrent}" Value="True">
+                                <Setter TargetName="Paper" Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+                                <Setter TargetName="Paper" Property="BorderThickness" Value="6" />
+                                <Setter TargetName="Number" Property="FontWeight" Value="SemiBold" />
+                            </DataTrigger>
+                        </DataTemplate.Triggers>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+
+            <GridSplitter Grid.Column="1" Width="4" HorizontalAlignment="Stretch" Background="{StaticResource BorderBrush}" Focusable="False" />
+
+            <!-- Viewer: continuous pages, rendered only when near the viewport. -->
+            <ScrollViewer x:Name="Viewer" Grid.Column="2" Background="{StaticResource ViewerBrush}" Focusable="True" FocusVisualStyle="{x:Null}"
+                          HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"
+                          ScrollChanged="Viewer_ScrollChanged" SizeChanged="Viewer_SizeChanged" PreviewMouseWheel="Viewer_PreviewMouseWheel"
+                          AutomationProperties.Name="Document">
+                <ItemsControl x:Name="PagesHost" ItemsSource="{Binding Pages}" Padding="20,0">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="{x:Type vm:PageViewModel}">
+                            <Border Margin="0,12" HorizontalAlignment="Center" BorderBrush="#BDBDBD" BorderThickness="1" Background="White">
+                                <Grid x:Name="PageRoot" Width="{Binding BaseWidth}" Height="{Binding BaseHeight}" Background="White"
+                                      MouseLeftButtonDown="Page_MouseLeftButtonDown" ClipToBounds="False">
+                                    <Grid.LayoutTransform>
+                                        <TransformGroup>
+                                            <RotateTransform Angle="{Binding Angle}" />
+                                            <ScaleTransform ScaleX="{Binding Scale}" ScaleY="{Binding Scale}" />
+                                        </TransformGroup>
+                                    </Grid.LayoutTransform>
+                                    <Image Source="{Binding Image}" Stretch="Fill" RenderOptions.BitmapScalingMode="HighQuality" />
+                                    <ItemsControl ItemsSource="{Binding Fields}" ItemsPanel="{StaticResource CanvasPanel}" ItemContainerStyle="{StaticResource CanvasItem}"
+                                                  Focusable="False" />
+                                    <ItemsControl ItemsSource="{Binding Overlays}" ItemsPanel="{StaticResource CanvasPanel}" ItemContainerStyle="{StaticResource CanvasItem}"
+                                                  Focusable="False" />
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+
+            <!-- Empty state -->
+            <Border Grid.Column="0" Grid.ColumnSpan="3" Background="{StaticResource ViewerBrush}" x:Name="EmptyState">
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding HasDocument}" Value="True">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="460">
+                    <TextBlock Text="&#xEA90;" FontFamily="{StaticResource IconFont}" FontSize="48" HorizontalAlignment="Center" Foreground="{StaticResource SubtleTextBrush}" />
+                    <TextBlock Text="Drop PDF files here" FontSize="20" HorizontalAlignment="Center" Margin="0,12,0,16" />
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <Button Content="Open PDF…" Padding="16,6" Margin="0,0,8,0" Command="{Binding OpenCommand}" />
+                        <Button Content="Combine files…" Padding="16,6" Command="{Binding CombineCommand}" />
+                    </StackPanel>
+                    <TextBlock Text="Recent" Margin="0,24,0,4" Foreground="{StaticResource SubtleTextBrush}">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding RecentFiles.Count}" Value="0">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                    <ItemsControl ItemsSource="{Binding RecentFiles}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Button Content="{Binding}" Click="RecentButton_Click" HorizontalContentAlignment="Left" Padding="6,3"
+                                        Background="Transparent" BorderThickness="0" Cursor="Hand" ToolTip="{Binding}">
+                                    <Button.ContentTemplate>
+                                        <DataTemplate>
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding Converter={StaticResource FileName}}" Foreground="{StaticResource AccentBrush}" />
+                                                <TextBlock Text="{Binding Converter={StaticResource FolderName}}" FontSize="11" TextTrimming="CharacterEllipsis"
+                                                           Foreground="{StaticResource SubtleTextBrush}" />
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </Button.ContentTemplate>
+                                </Button>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </DockPanel>
+</Window>

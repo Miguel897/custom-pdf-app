@@ -1,0 +1,15 @@
+# Text files use LF, in the repository and in the working copy (overrides core.autocrlf).
+* text=auto eol=lf
+
+# Windows scripts need CRLF to run correctly.
+*.bat  text eol=crlf
+*.cmd  text eol=crlf
+
+# Binary files: never touch.
+*.jpg  binary
+*.jpeg binary
+*.png  binary
+*.ico  binary
+*.pdf  binary
+*.exe  binary
+*.dll  binary
