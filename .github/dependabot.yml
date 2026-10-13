@@ -1,0 +1,15 @@
+# Weekly NuGet updates (grouped) and monthly GitHub Actions updates. Review by hand: PDFium updates
+# carry security fixes for parsing untrusted PDFs, so keep them flowing (PRD §7.6).
+version: 2
+updates:
+  - package-ecosystem: nuget
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      tests:
+        patterns: ["xunit*", "Microsoft.NET.Test.Sdk", "coverlet*"]
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly

@@ -1,0 +1,24 @@
+# Build and test on every push and pull request.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      # CI=true makes restore use the committed packages.lock.json files (locked mode).
+      - name: Test
+        run: dotnet test PdfDesk.slnx -c Release
