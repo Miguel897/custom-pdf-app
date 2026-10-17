@@ -15,7 +15,7 @@ Nothing leaves your PC, and nothing is written until you click **Save**.
 
 ## Download
 
-Get `PdfDesk.exe` from the [latest release](https://github.com/Miguel897/custom-pdf-app/releases/latest).
+Get `PdfDesk.exe` from the [latest release](https://github.com/Miguel897/pdfdesk/releases/latest).
 It is a single self-contained file: no installer, no .NET install, no admin rights.
 
 Requirements: Windows 10/11 x64.
