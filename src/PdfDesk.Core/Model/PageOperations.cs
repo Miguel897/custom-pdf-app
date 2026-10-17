@@ -39,6 +39,13 @@ public static class PageOperations
             : Move(state, ids, indices[^1] + 2);
     }
 
+    /// <summary>
+    /// Only the given pages, in document order, with their edits and the form values (for extracting
+    /// pages into a new file). Unlike the other operations this is not an edit of the open document.
+    /// </summary>
+    public static DocumentState Keep(DocumentState state, IReadOnlySet<Guid> ids) =>
+        state with { Pages = [.. state.Pages.Where(p => ids.Contains(p.Id))] };
+
     public static DocumentState Delete(DocumentState state, IReadOnlySet<Guid> ids)
     {
         var remaining = state.Pages.RemoveAll(p => ids.Contains(p.Id));

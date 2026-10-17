@@ -14,6 +14,7 @@ Nothing leaves your PC, and nothing is written until you click **Save**.
 - **Reorder** pages by dragging thumbnails (multi-select with Ctrl/Shift), **rotate** and **delete** pages, with undo/redo.
 - **Combine** the PDFs of a folder: tick files, sort by name (`2` before `10`), date or by hand, then fine-tune page by page before saving.
 - **Insert** pages from other PDFs by dropping files onto the thumbnail strip.
+- **Extract** selected pages to a new PDF, or **split** a document into one PDF per page (⋯ menu).
 - **Fill in forms**:
   - **Text** draws typed text into the page (looks the same in every viewer).
   - **Editable text** saves it as a standard annotation that Acrobat, Edge, etc. can still move and edit.

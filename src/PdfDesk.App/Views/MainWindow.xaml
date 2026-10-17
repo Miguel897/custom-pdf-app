@@ -154,6 +154,10 @@
                         </MenuItem.Header>
                         <MenuItem Header="Recent files" ItemsSource="{Binding RecentFiles}" Click="Recent_Click" />
                         <MenuItem Header="Insert pages from PDF…" Command="{Binding InsertPagesCommand}" IsEnabled="{Binding HasDocument}" />
+                        <MenuItem Header="Extract pages to new PDF…" Command="{Binding ExtractPagesCommand}" IsEnabled="{Binding HasDocument}"
+                                  ToolTip="Saves the selected pages (or the current page) as a new file. The open document does not change." />
+                        <MenuItem Header="Split into one PDF per page…" Command="{Binding SplitPagesCommand}" IsEnabled="{Binding HasDocument}"
+                                  ToolTip="Saves every page as its own file in a folder you choose. The open document does not change." />
                         <Separator />
                         <MenuItem Header="Open in default app" Command="{Binding OpenInDefaultAppCommand}" IsEnabled="{Binding HasDocument}" />
                         <MenuItem Header="Show in folder" Command="{Binding OpenFolderCommand}" IsEnabled="{Binding HasDocument}" />
