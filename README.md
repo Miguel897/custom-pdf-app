@@ -6,6 +6,7 @@ Nothing leaves your PC, and nothing is written until you click **Save**.
 [![CI](https://github.com/Miguel897/pdfdesk/actions/workflows/ci.yml/badge.svg)](https://github.com/Miguel897/pdfdesk/actions/workflows/ci.yml)
 [![Latest release](https://img.shields.io/github/v/release/Miguel897/pdfdesk)](https://github.com/Miguel897/pdfdesk/releases/latest)
 [![License: MIT](https://img.shields.io/github/license/Miguel897/pdfdesk)](LICENSE)
+[![Roadmap](https://img.shields.io/badge/roadmap-GitHub%20Project-blue)](https://github.com/users/Miguel897/projects/2)
 
 ![PdfDesk showing a report with page thumbnails](docs/images/viewer.png)
 
@@ -54,6 +55,7 @@ This is registered for your user only (no admin). If you move `PdfDesk.exe`, use
 | Move a text box | Drag the blue handle on its left |
 | Navigate | PgUp / PgDn, Home / End, or type a page number in the status bar |
 | Zoom | Ctrl+wheel, Ctrl+plus / Ctrl+minus, Ctrl+0; fit width / fit page in the status bar |
+| All shortcuts | F1, or ⋯ › Keyboard shortcuts |
 
 Good to know:
 

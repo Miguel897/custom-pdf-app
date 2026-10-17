@@ -34,6 +34,8 @@ public interface IDialogService
     IReadOnlyList<string>? AskCombine();
 
     void ShowAbout();
+
+    void ShowShortcuts();
 }
 
 public sealed class DialogService(Window owner) : IDialogService
@@ -91,4 +93,6 @@ public sealed class DialogService(Window owner) : IDialogService
     }
 
     public void ShowAbout() => new AboutWindow { Owner = owner }.ShowDialog();
+
+    public void ShowShortcuts() => new ShortcutsWindow { Owner = owner }.ShowDialog();
 }
