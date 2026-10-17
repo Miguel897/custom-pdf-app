@@ -36,6 +36,22 @@ Requirements: Windows 10/11 x64.
 
 The exe is not code-signed, so SmartScreen may warn on first start (**More info › Run anyway**).
 
+### Verify the download
+
+Each release lists the SHA-256 checksum in `SHA256SUMS.txt`. In PowerShell, in the download folder:
+
+```powershell
+(Get-FileHash .\PdfDesk.exe -Algorithm SHA256).Hash.ToLower()
+```
+
+The result must match the value in `SHA256SUMS.txt`. Releases also carry a GitHub build provenance
+attestation, which proves the exe was built by this repository's release workflow from the tagged
+source. With the [GitHub CLI](https://cli.github.com/):
+
+```powershell
+gh attestation verify .\PdfDesk.exe --repo Miguel897/pdfdesk
+```
+
 ### Open PDFs from Explorer
 
 In PdfDesk: **⋯ › Show PdfDesk in "Open with"**. Then in Explorer right-click a PDF ›

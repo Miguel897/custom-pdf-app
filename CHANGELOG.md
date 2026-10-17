@@ -10,6 +10,11 @@ as the release notes and fails if it is missing.
 
 ## [Unreleased]
 
+### Added
+
+- Releases include `SHA256SUMS.txt` and a GitHub build provenance attestation, so downloads can
+  be verified (see README › Verify the download).
+
 ## [0.4.0] - 2026-10-17
 
 ### Added
