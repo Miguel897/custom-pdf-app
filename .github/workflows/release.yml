@@ -7,6 +7,8 @@ on:
 
 permissions:
   contents: write
+  id-token: write     # build provenance attestation (Sigstore)
+  attestations: write
 
 jobs:
   release:
@@ -27,6 +29,18 @@ jobs:
       - name: Publish single-file exe
         run: dotnet publish src/PdfDesk.App -c Release -r win-x64 -o publish
 
+      # Lets users check the download: Get-FileHash, or `gh attestation verify` (see README).
+      - name: SHA-256 checksum
+        shell: pwsh
+        run: |
+          $hash = (Get-FileHash publish/PdfDesk.exe -Algorithm SHA256).Hash.ToLowerInvariant()
+          "$hash  PdfDesk.exe" | Set-Content publish/SHA256SUMS.txt -NoNewline
+          Get-Content publish/SHA256SUMS.txt
+
+      - uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-path: publish/PdfDesk.exe
+
       # The tag's CHANGELOG.md section becomes the release notes; GitHub's generated list follows it.
       - name: Release notes from CHANGELOG.md
         shell: pwsh
@@ -42,7 +56,9 @@ jobs:
       # Third-party action with write access: pinned to a commit; Dependabot updates it.
       - uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
         with:
-          files: publish/PdfDesk.exe
+          files: |
+            publish/PdfDesk.exe
+            publish/SHA256SUMS.txt
           body_path: release-notes.md
           generate_release_notes: true
           prerelease: ${{ contains(github.ref_name, '-') }}
