@@ -1,0 +1,33 @@
+<Window x:Class="PdfDesk.App.Views.AboutWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="About PdfDesk" SizeToContent="Height" Width="460" ResizeMode="NoResize"
+        WindowStartupLocation="CenterOwner" ShowInTaskbar="False" Background="{StaticResource ChromeBrush}">
+    <StackPanel Margin="20">
+        <StackPanel Orientation="Horizontal">
+            <Image Source="/Assets/PdfDesk.ico" Width="64" Height="64" RenderOptions.BitmapScalingMode="HighQuality" />
+            <StackPanel Margin="16,0,0,0" VerticalAlignment="Center">
+                <TextBlock Text="PdfDesk" FontSize="22" FontWeight="SemiBold" />
+                <TextBlock x:Name="VersionText" Foreground="{StaticResource SubtleTextBrush}" Margin="0,2,0,0" />
+            </StackPanel>
+        </StackPanel>
+
+        <TextBlock Text="View, reorder, combine and fill in PDFs." Margin="0,16,0,0" TextWrapping="Wrap" />
+        <TextBlock Margin="0,8,0,0" TextWrapping="Wrap" Foreground="{StaticResource SubtleTextBrush}"
+                   Text="Works offline: no telemetry, no network access, no account. Your files never leave this PC." />
+        <TextBlock x:Name="CopyrightText" Margin="0,8,0,0" TextWrapping="Wrap" Foreground="{StaticResource SubtleTextBrush}" />
+
+        <WrapPanel Margin="0,14,0,0">
+            <TextBlock Margin="0,0,16,0"><Hyperlink NavigateUri="https://github.com/Miguel897/custom-pdf-app" RequestNavigate="Link_RequestNavigate">Website and source code</Hyperlink></TextBlock>
+            <TextBlock Margin="0,0,16,0"><Hyperlink NavigateUri="https://github.com/Miguel897/custom-pdf-app/issues/new" RequestNavigate="Link_RequestNavigate">Report a problem</Hyperlink></TextBlock>
+            <TextBlock><Hyperlink Click="Notices_Click">Third-party notices</Hyperlink></TextBlock>
+        </WrapPanel>
+
+        <TextBox x:Name="NoticesBox" Visibility="Collapsed" Height="260" Margin="0,12,0,0" IsReadOnly="True"
+                 FontFamily="Consolas" FontSize="11" TextWrapping="NoWrap"
+                 HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"
+                 AutomationProperties.Name="Third-party notices" />
+
+        <Button Content="Close" IsCancel="True" IsDefault="True" Padding="16,4" Margin="0,16,0,0" HorizontalAlignment="Right" />
+    </StackPanel>
+</Window>

@@ -15,8 +15,16 @@
     <AssemblyName>PdfDesk</AssemblyName>
     <RootNamespace>PdfDesk.App</RootNamespace>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>Assets\PdfDesk.ico</ApplicationIcon>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Icon for the About dialog; window title bars use the exe icon (ApplicationIcon). -->
+    <Resource Include="Assets\PdfDesk.ico" />
+    <!-- Required by the bundled components' licenses; shown in About › Third-party notices. -->
+    <EmbeddedResource Include="..\..\THIRD-PARTY-NOTICES.txt" LogicalName="THIRD-PARTY-NOTICES.txt" />
+  </ItemGroup>
 
   <!-- dotnet publish src/PdfDesk.App -c Release -r win-x64  =>  one self-contained PdfDesk.exe -->
   <PropertyGroup Condition="'$(RuntimeIdentifier)' != ''">

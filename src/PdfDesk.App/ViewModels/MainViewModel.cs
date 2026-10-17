@@ -515,6 +515,9 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
         Process.Start("explorer.exe", Log.Folder);
     }
 
+    [RelayCommand]
+    private void ShowAbout() => _dialogs.ShowAbout();
+
     private void AddRecent(string path)
     {
         App.Settings.AddRecent(path);
