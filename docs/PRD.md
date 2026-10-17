@@ -343,7 +343,7 @@ Mitigations:
 | Q6 | Allow "Save" to overwrite the original file? | Yes, with atomic replace. Save As makes a copy with a new name/path (F33–F34). | **Decided** |
 | Q7 | Register as Windows PDF handler / "Open with"? | Per-user HKCU registration button, no installer (F40). | **Decided** |
 | Q8 | Printing? | Out of scope v1: "Open in default app" button. P2: print via PDFium render → `PrintDialog`. | **Decided** |
-| Q9 | App name. | "PdfDesk" (matches ScanDesk). Checked 2026-10-17: no product with this exact name found. Names containing "Win"/"Windows" were rejected, since Microsoft's trademark guidelines bar its marks in product names; "for Windows" is used as a description instead. Repository renamed to `pdfdesk`. | **Decided** |
+| Q9 | App name. | "PdfDesk" (matches ScanDesk). Checked 2026-10-17: no product with this exact name found; TMview (EUIPO, OEPM and other offices) shows no PDFDESK mark, only a dead US filing for DESKPDF (Docudesk, 2005). Names containing "Win"/"Windows" were rejected, since Microsoft's trademark guidelines bar its marks in product names; "for Windows" is used as a description instead. Repository renamed to `pdfdesk`. | **Decided** |
 | Q10 | Shared code with ScanDesk (settings store, single-file publish, dialog service)? | Copy for now; extract a shared `Desk.Common` package only if a third app appears. | **Decided** |
 
 ## 11. Milestones
