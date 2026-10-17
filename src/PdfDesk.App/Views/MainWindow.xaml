@@ -162,6 +162,7 @@
                                   Command="{Binding ToggleOpenWithCommand}" />
                         <MenuItem Header="Open log folder" Command="{Binding OpenLogFolderCommand}" />
                         <Separator />
+                        <MenuItem Header="Keyboard shortcuts" InputGestureText="F1" Command="{Binding ShowShortcutsCommand}" />
                         <MenuItem Header="About PdfDesk" Command="{Binding ShowAboutCommand}" />
                     </MenuItem>
                 </Menu>

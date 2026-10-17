@@ -684,6 +684,14 @@ public partial class MainWindow : Window
         var key = e.Key == Key.System ? e.SystemKey : e.Key;
         var typing = Keyboard.FocusedElement is TextBoxBase or PasswordBox or ComboBox;
 
+        // F1 works everywhere, also while typing. Keep ShortcutsWindow.All in sync with this method.
+        if (key == Key.F1 && modifiers == ModifierKeys.None)
+        {
+            vm.ShowShortcutsCommand.Execute(null);
+            e.Handled = true;
+            return;
+        }
+
         // While typing, Ctrl+Z/Y and Ctrl+A belong to the text box.
         ICommand? command = (ctrl, shift, key) switch
         {

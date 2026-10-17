@@ -10,6 +10,11 @@ as the release notes and fails if it is missing.
 
 ## [Unreleased]
 
+### Added
+
+- **F1** (or ⋯ › Keyboard shortcuts) lists all keyboard and mouse shortcuts.
+- README links to the public [roadmap](https://github.com/users/Miguel897/projects/2).
+
 ## [0.3.0] - 2026-10-17
 
 ### Changed

@@ -518,6 +518,9 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     [RelayCommand]
     private void ShowAbout() => _dialogs.ShowAbout();
 
+    [RelayCommand]
+    private void ShowShortcuts() => _dialogs.ShowShortcuts();
+
     private void AddRecent(string path)
     {
         App.Settings.AddRecent(path);
