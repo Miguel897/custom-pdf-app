@@ -3,6 +3,12 @@
 A small, fast Windows app for everyday PDF chores: view, reorder, combine, and fill in forms.
 Nothing leaves your PC, and nothing is written until you click **Save**.
 
+[![CI](https://github.com/Miguel897/pdfdesk/actions/workflows/ci.yml/badge.svg)](https://github.com/Miguel897/pdfdesk/actions/workflows/ci.yml)
+[![Latest release](https://img.shields.io/github/v/release/Miguel897/pdfdesk)](https://github.com/Miguel897/pdfdesk/releases/latest)
+[![License: MIT](https://img.shields.io/github/license/Miguel897/pdfdesk)](LICENSE)
+
+![PdfDesk showing a report with page thumbnails](docs/images/viewer.png)
+
 - **View** PDFs with smooth continuous scrolling, zoom and thumbnails.
 - **Reorder** pages by dragging thumbnails (multi-select with Ctrl/Shift), **rotate** and **delete** pages, with undo/redo.
 - **Combine** the PDFs of a folder: tick files, sort by name (`2` before `10`), date or by hand, then fine-tune page by page before saving.
@@ -13,9 +19,15 @@ Nothing leaves your PC, and nothing is written until you click **Save**.
   - Fillable PDFs: text fields and checkboxes are highlighted and can be typed into or ticked.
 - Opens password-protected PDFs (asks for the password).
 
+| Fill in forms | Combine the PDFs of a folder |
+|---|---|
+| ![Filling in a form's fields](docs/images/forms.png) | ![The Combine dialog listing the PDFs of a folder](docs/images/combine.png) |
+
+The screenshots use fictional sample documents.
+
 ## Download
 
-Get `PdfDesk.exe` from the [latest release](https://github.com/Miguel897/custom-pdf-app/releases/latest).
+Get `PdfDesk.exe` from the [latest release](https://github.com/Miguel897/pdfdesk/releases/latest).
 It is a single self-contained file: no installer, no .NET install, no admin rights.
 
 Requirements: Windows 10/11 x64.

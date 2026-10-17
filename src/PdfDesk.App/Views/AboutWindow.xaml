@@ -18,8 +18,8 @@
         <TextBlock x:Name="CopyrightText" Margin="0,8,0,0" TextWrapping="Wrap" Foreground="{StaticResource SubtleTextBrush}" />
 
         <WrapPanel Margin="0,14,0,0">
-            <TextBlock Margin="0,0,16,0"><Hyperlink NavigateUri="https://github.com/Miguel897/custom-pdf-app" RequestNavigate="Link_RequestNavigate">Website and source code</Hyperlink></TextBlock>
-            <TextBlock Margin="0,0,16,0"><Hyperlink NavigateUri="https://github.com/Miguel897/custom-pdf-app/issues/new" RequestNavigate="Link_RequestNavigate">Report a problem</Hyperlink></TextBlock>
+            <TextBlock Margin="0,0,16,0"><Hyperlink NavigateUri="https://github.com/Miguel897/pdfdesk" RequestNavigate="Link_RequestNavigate">Website and source code</Hyperlink></TextBlock>
+            <TextBlock Margin="0,0,16,0"><Hyperlink NavigateUri="https://github.com/Miguel897/pdfdesk/issues/new" RequestNavigate="Link_RequestNavigate">Report a problem</Hyperlink></TextBlock>
             <TextBlock><Hyperlink Click="Notices_Click">Third-party notices</Hyperlink></TextBlock>
         </WrapPanel>
 

@@ -10,6 +10,16 @@ as the release notes and fails if it is missing.
 
 ## [Unreleased]
 
+### Changed
+
+- The project moved to [github.com/Miguel897/pdfdesk](https://github.com/Miguel897/pdfdesk); links in
+  the app point there. Old links redirect.
+- README with screenshots; bug report and feature request forms; security policy.
+
+### Fixed
+
+- Combine dialog: file names are aligned with the other columns, and rows are no taller than needed.
+
 ## [0.2.0] - 2026-10-17
 
 ### Added
@@ -39,7 +49,7 @@ First release.
 - Open password-protected PDFs.
 - Optional "Open with" registration in Explorer.
 
-[Unreleased]: https://github.com/Miguel897/custom-pdf-app/compare/v0.2.0...HEAD
-[0.2.0]: https://github.com/Miguel897/custom-pdf-app/compare/v0.1.1...v0.2.0
-[0.1.1]: https://github.com/Miguel897/custom-pdf-app/compare/v0.1.0...v0.1.1
-[0.1.0]: https://github.com/Miguel897/custom-pdf-app/releases/tag/v0.1.0
+[Unreleased]: https://github.com/Miguel897/pdfdesk/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/Miguel897/pdfdesk/compare/v0.1.1...v0.2.0
+[0.1.1]: https://github.com/Miguel897/pdfdesk/compare/v0.1.0...v0.1.1
+[0.1.0]: https://github.com/Miguel897/pdfdesk/releases/tag/v0.1.0
