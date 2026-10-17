@@ -5,7 +5,6 @@
 | **Status** | v1 implemented (2026-10-13); released as v0.1.0, latest v0.2.0 — see §12 and [CHANGELOG](../CHANGELOG.md) |
 | **Date** | 2026-10-13 |
 | **Platform** | Windows 11 (x64), .NET 10 LTS, WPF |
-| **Sibling app** | ScanDesk (`custom-printer-app`) — same stack and conventions |
 
 ## 1. Summary
 
@@ -23,10 +22,9 @@ the user clicks **Save / Save As**. Source files are never modified implicitly.
 
 ## 2. Background
 
-- ScanDesk proved the stack: .NET 10 + WPF + MVVM Toolkit + PDFsharp, shipped as one
-  self-contained exe. PdfDesk reuses it.
-- ScanDesk previews by **rebuilding a whole temp PDF** and showing it in WebView2 (Edge viewer).
-  That is fine for scans but does not fit PdfDesk:
+- The stack is proven: .NET 10 + WPF + MVVM Toolkit + PDFsharp, shipped as one self-contained exe.
+- A simple approach to previews is to **rebuild a whole temp PDF** and show it in WebView2 (Edge
+  viewer). That does not fit PdfDesk:
   - the user needs to **click on a page to place text**, which a WebView2-hosted viewer cannot expose;
   - rebuilding the full PDF on every reorder of a 200-page merged document is wasteful.
 - **Decision (proposed):** render pages ourselves with **PDFium** into WPF images, and
@@ -195,13 +193,13 @@ All icon-only buttons have tooltips and automation names.
 
 | Concern | Choice | Notes |
 |---|---|---|
-| Runtime | .NET 10 (LTS) | Same as ScanDesk |
-| UI | WPF + MVVM (`CommunityToolkit.Mvvm`) | Same as ScanDesk |
+| Runtime | .NET 10 (LTS) | Long-term support until 2028 |
+| UI | WPF + MVVM (`CommunityToolkit.Mvvm`) | Mature, Windows-only, no extra runtime |
 | **Rendering** | **PDFium** via `bblanchon.PDFium.Win32` (native `pdfium.dll`, BSD/Apache) + thin own P/Invoke wrapper (~300 lines) | Renders pages + form-field appearances to BGRA → `WriteableBitmap`. Alternatives in Q1. |
 | **Writing / editing** | **PDFsharp 6.x** (MIT) | Import pages from sources, set `/Rotate`, draw flattened text with `XGraphics`, set AcroForm values, save. |
 | Fonts | PDFsharp font resolver → embedded subset of a Windows font (Arial/Segoe UI) | Required for á/ñ/€ (F26). |
-| Tests | xUnit; test PDFs generated in code; render-based checks of text placement | Core only, like ScanDesk |
-| Logging | Own ~60-line daily log in `%LOCALAPPDATA%\PdfDesk\logs` (7 days) | ScanDesk has none — improvement. No Serilog needed. |
+| Tests | xUnit; test PDFs generated in code; render-based checks of text placement | Core only |
+| Logging | Own ~60-line daily log in `%LOCALAPPDATA%\PdfDesk\logs` (7 days) | No Serilog needed. |
 
 Both libraries are permissive (no AGPL like iText/MuPDF), so the app can be shared freely.
 
@@ -216,8 +214,7 @@ PdfDesk.slnx
 └─ tests/PdfDesk.Core.Tests
 ```
 
-Improvements over ScanDesk: central package management with lock files, shared build props, a log
-file, and the document logic in Core (`WorkingDocument`, `PageOperations`) so the app view models stay
+Central package management with lock files, shared build props, a log file, and the document logic in Core (`WorkingDocument`, `PageOperations`) so the app view models stay
 thin: `MainViewModel` (commands and workflow), `PageViewModel`, `OverlayViewModel`, `FieldViewModel`,
 `CombineViewModel`.
 
@@ -277,11 +274,11 @@ them (e.g. the IRS W-9: 140 KB) grow when saved in place (~265 KB).
 
 ### 7.5 Distribution
 
-- `dotnet publish -c Release -r win-x64` with ScanDesk's conditional single-file block
+- `dotnet publish -c Release -r win-x64` with a conditional single-file block
   → one `PdfDesk.exe` (~65–75 MB incl. `pdfium.dll`, self-extracted). No WebView2 dependency.
 - "Open with" integration: per-user HKCU registration from Settings (F40). No installer in v1.
-- Release workflow: tag `v*` → test → publish → GitHub release (copy ScanDesk's), **plus** a
-  build+test workflow on every push/PR and Dependabot (missing in ScanDesk).
+- Release workflow: tag `v*` → test → publish → GitHub release, **plus** a build+test workflow
+  on every push/PR and Dependabot.
 - Since v0.2.0 the version comes from the git tag (MinVer) and the release notes from the tag's
   section in `CHANGELOG.md`. The exe embeds `THIRD-PARTY-NOTICES.txt` (shown in About), as the
   bundled licenses require.
@@ -292,9 +289,9 @@ NuGet figures as of 2026-10-13:
 
 | Package | Version | Total downloads | Maintainer | Last release | Assessment |
 |---|---|---|---|---|---|
-| `PDFsharp` | 6.2.4 | ~73 M | empira GmbH ("PDFsharp Team"), project active since 2005 | 2026-01 | Industry standard for .NET PDF writing; MIT. Already proven in ScanDesk. |
+| `PDFsharp` | 6.2.4 | ~73 M | empira GmbH ("PDFsharp Team"), project active since 2005 | 2026-01 | Industry standard for .NET PDF writing; MIT. |
 | `bblanchon.PDFium.Win32` | 157.0.8100 | ~9.4 M | Benoît Blanchon (NuGet-verified prefix) | 2026-10 (tracks Chromium weekly) | Binary build of **Google's PDFium** (the Chrome PDF engine, fuzzed continuously by OSS-Fuzz). Builds run in public GitHub Actions from Chromium sources. Used underneath PDFtoImage and other wrappers. |
-| `CommunityToolkit.Mvvm` | 8.4.2 | ~29 M | Microsoft (.NET Foundation) | 2026-03 | Safe. Already in ScanDesk. |
+| `CommunityToolkit.Mvvm` | 8.4.2 | ~29 M | Microsoft (.NET Foundation) | 2026-03 | Safe. |
 | `Serilog.Sinks.File` (optional) | 7.0.0 | ~1.2 B | Serilog contributors | 2025-04 | Safe. Optional: a ~50-line own logger avoids the dependency. |
 | xUnit, Microsoft.NET.Test.Sdk | — | — | .NET Foundation / Microsoft | — | Test-only, not shipped. |
 
@@ -323,27 +320,26 @@ Mitigations:
 
 | Option | Verdict |
 |---|---|
-| WebView2 (Edge viewer) for preview, like ScanDesk | Rejected for the main viewer: no click-to-place text, full rebuild per change. Edge can fill AcroForms itself, but its saved output is not controllable from the app. |
+| WebView2 (Edge viewer) for preview | Rejected for the main viewer: no click-to-place text, full rebuild per change. Edge can fill AcroForms itself, but its saved output is not controllable from the app. |
 | `Windows.Data.Pdf` (built-in WinRT renderer) | Zero extra payload, but needs a Windows-SDK TFM, no form-field rendering control, no password API. Fallback if PDFium causes issues. |
 | `PDFtoImage` / `Docnet.Core` (PDFium wrappers) | Viable shortcut; `PDFtoImage` pulls in SkiaSharp (+~10 MB), `Docnet.Core` is little maintained. Own thin wrapper preferred. |
 | iText, MuPDF | AGPL — rejected. |
 | Syncfusion / Telerik / Apryse PDF viewer controls | Commercial licenses / heavy — rejected. |
-| WinUI 3 | Heavier packaging; WPF is enough (same reasoning as ScanDesk). |
+| WinUI 3 | Heavier packaging; WPF is enough. |
 
 ## 10. Open questions
 
 | # | Question | Answer | Status |
 |---|---|---|---|
-| Q1 | Rendering engine: own PDFium rendering vs. reuse ScanDesk's WebView2 viewer? | **PDFium** (own rendering). Required for click-to-place text and fast reorder. Adds ~5 MB and ~300 lines of interop. | **Decided** |
+| Q1 | Rendering engine: own PDFium rendering vs. a WebView2 (Edge) viewer? | **PDFium** (own rendering). Required for click-to-place text and fast reorder. Adds ~5 MB and ~300 lines of interop. | **Decided** |
 | Q2 | Form filling scope for v1? | Flat text **P0**. AcroForm **P1, low-hanging fruit only**: text fields and checkboxes (F28). | **Decided** |
-| Q3 | One document per window, tabs, or single instance? | **One document per window, multiple windows allowed** (no single-instance mutex, unlike ScanDesk), so "Open with" on a second file just opens a new window. Tabs = P2. | **Decided** |
+| Q3 | One document per window, tabs, or single instance? | **One document per window, multiple windows allowed** (no single-instance mutex), so "Open with" on a second file just opens a new window. Tabs = P2. | **Decided** |
 | Q4 | Combine dialog: PDFs only, or images too? | PDFs only in v1; images next version (F21 → P2). | **Decided** |
 | Q5 | Typed text: flattened or editable annotation? | **Both**, as two toolbar buttons (F24, F27, F27a). | **Decided** |
 | Q6 | Allow "Save" to overwrite the original file? | Yes, with atomic replace. Save As makes a copy with a new name/path (F33–F34). | **Decided** |
 | Q7 | Register as Windows PDF handler / "Open with"? | Per-user HKCU registration button, no installer (F40). | **Decided** |
 | Q8 | Printing? | Out of scope v1: "Open in default app" button. P2: print via PDFium render → `PrintDialog`. | **Decided** |
-| Q9 | App name. | "PdfDesk" (matches ScanDesk). Checked 2026-10-17: no product with this exact name found; TMview (EUIPO, OEPM and other offices) shows no PDFDESK mark, only a dead US filing for DESKPDF (Docudesk, 2005). Names containing "Win"/"Windows" were rejected, since Microsoft's trademark guidelines bar its marks in product names; "for Windows" is used as a description instead. Repository renamed to `pdfdesk`. | **Decided** |
-| Q10 | Shared code with ScanDesk (settings store, single-file publish, dialog service)? | Copy for now; extract a shared `Desk.Common` package only if a third app appears. | **Decided** |
+| Q9 | App name. | "PdfDesk". Checked 2026-10-17: no product with this exact name found; TMview (EUIPO, OEPM and other offices) shows no PDFDESK mark, only a dead US filing for DESKPDF (Docudesk, 2005). Names containing "Win"/"Windows" were rejected, since Microsoft's trademark guidelines bar its marks in product names; "for Windows" is used as a description instead. Repository renamed to `pdfdesk`. | **Decided** |
 
 ## 11. Milestones
 
@@ -363,7 +359,7 @@ screenshots) and/or covered by unit tests, including render-based checks (36 tes
 
 | Area | Requirements | Status |
 |---|---|---|
-| M0 spike | — | Done with generated PDFs, a real scan (from ScanDesk), the public IRS W-9 (AcroForm, object streams) and an AES-256 encrypted file. All checks passed; findings in §7.4. Output checked with PDFium (Chrome's engine) only: **Acrobat Reader and Edge not checked yet** (not installed). |
+| M0 spike | — | Done with generated PDFs, a real scanned document, the public IRS W-9 (AcroForm, object streams) and an AES-256 encrypted file. All checks passed; findings in §7.4. Output checked with PDFium (Chrome's engine) only: **Acrobat Reader and Edge not checked yet** (not installed). |
 | Viewing | F1–F6, F8 | Done, verified. A 300-page file is shown in ~0.6 s and uses ~260 MB. Password prompt with retry verified. |
 | Search | F7 | Not started (P2). |
 | Page operations | F9–F14 | Done, verified: drag & drop including multi-select, Alt+↑/↓, rotate, delete, insert by drop, undo/redo. |
