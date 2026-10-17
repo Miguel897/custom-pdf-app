@@ -1,0 +1,13 @@
+# Categories for GitHub's generated release notes, which the release workflow appends below the
+# CHANGELOG.md section. Dependency bumps are left out: user-relevant ones (e.g. security fixes)
+# belong in CHANGELOG.md.
+changelog:
+  exclude:
+    labels: [dependencies]
+  categories:
+    - title: New features
+      labels: [enhancement]
+    - title: Fixes
+      labels: [bug]
+    - title: Other changes
+      labels: ["*"]

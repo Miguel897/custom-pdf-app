@@ -13,6 +13,8 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0 # MinVer needs the tags to compute the version
 
       - uses: actions/setup-dotnet@v6
         with:
@@ -21,14 +23,26 @@ jobs:
       - name: Test
         run: dotnet test PdfDesk.slnx -c Release
 
+      # MinVer takes the version from the tag.
       - name: Publish single-file exe
+        run: dotnet publish src/PdfDesk.App -c Release -r win-x64 -o publish
+
+      # The tag's CHANGELOG.md section becomes the release notes; GitHub's generated list follows it.
+      - name: Release notes from CHANGELOG.md
         shell: pwsh
         run: |
           $version = "${{ github.ref_name }}".TrimStart("v")
-          dotnet publish src/PdfDesk.App -c Release -r win-x64 -o publish -p:Version=$version
+          $changelog = Get-Content CHANGELOG.md -Raw
+          # Text between "## [<version>] ..." and the next "## [" heading or the link references.
+          $pattern = '(?ms)^## \[' + [regex]::Escape($version) + '\].*?$(.*?)(?=^## \[|^\[|\z)'
+          $section = [regex]::Match($changelog, $pattern)
+          if (-not $section.Success) { throw "CHANGELOG.md has no section for $version" }
+          $section.Groups[1].Value.Trim() | Set-Content release-notes.md
 
       # Third-party action with write access: pinned to a commit; Dependabot updates it.
       - uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
         with:
           files: publish/PdfDesk.exe
+          body_path: release-notes.md
           generate_release_notes: true
+          prerelease: ${{ contains(github.ref_name, '-') }}

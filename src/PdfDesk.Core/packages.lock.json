@@ -8,6 +8,12 @@
         "resolved": "157.0.8100",
         "contentHash": "OeimMc5Zn7XFuiczK1/C88Xfe3Ney4fxIxnhKfO44TVIvMhNqEbkbrRYaFGS5SMveaw3uDG0lewgV9qICZjpAQ=="
       },
+      "MinVer": {
+        "type": "Direct",
+        "requested": "[8.0.0, )",
+        "resolved": "8.0.0",
+        "contentHash": "AJy/KVjXgUbgjf6HiI8wAk4DSSq0SCmvXQF8aU6IB+pnIQq+YJvofvMczug2hqO8yEvnQY557ryew66KPpyCsA=="
+      },
       "PDFsharp": {
         "type": "Direct",
         "requested": "[6.2.4, )",

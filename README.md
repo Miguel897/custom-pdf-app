@@ -83,8 +83,15 @@ Package versions are pinned centrally in `Directory.Packages.props` and locked i
 
 ### Releasing
 
-Push a tag like `v1.0.0`: the release workflow tests, publishes `PdfDesk.exe` with that version and
-attaches it to a GitHub release.
+The version comes from git tags ([MinVer](https://github.com/adamralph/minver)); there is no version
+number to edit. Untagged builds get a pre-release version such as `0.1.2-alpha.0.3`.
+
+1. In [CHANGELOG.md](CHANGELOG.md), rename **Unreleased** to the new version and date (in a PR).
+2. Tag that commit on `main` and push the tag: `git tag v1.0.0 && git push origin v1.0.0`.
+
+The release workflow tests, publishes `PdfDesk.exe` and creates the GitHub release. The release notes
+are the version's CHANGELOG section followed by GitHub's generated list of PRs (dependency bumps
+excluded). Tags with a suffix such as `v1.1.0-beta.1` become pre-releases.
 
 ## Project layout
 
