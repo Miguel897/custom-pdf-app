@@ -4,7 +4,6 @@
 |---|---|
 | **Status** | v1 implemented (2026-10-13); released as v0.1.0, latest v0.2.0 — see §12 and [CHANGELOG](../CHANGELOG.md) |
 | **Date** | 2026-10-13 |
-| **Owner** | miguel |
 | **Platform** | Windows 11 (x64), .NET 10 LTS, WPF |
 | **Sibling app** | ScanDesk (`custom-printer-app`) — same stack and conventions |
 
@@ -55,7 +54,7 @@ the user clicks **Save / Save As**. Source files are never modified implicitly.
 
 ## 4. Users and scenarios
 
-Single user (the owner), home/office paperwork.
+Individual users handling home and office paperwork.
 
 | # | Scenario |
 |---|---|
@@ -155,7 +154,7 @@ Single main window, WPF. One document per window (see Q3).
 │ PAGES        │                                                                │
 │ ┌────────┐   │        ┌──────────────────────────────────────┐                │
 │ │   1    │   │        │                                      │                │
-│ └────────┘   │        │   Name:  [Miguel …            ]◄text │                │
+│ └────────┘   │        │   Name:  [Alex …              ]◄text │                │
 │ ┌────────┐   │        │                                      │                │
 │ │   2    │◄  │        │   Date:  [13/10/2026]                │                │
 │ └────────┘   │        │                                      │                │
