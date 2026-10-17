@@ -363,7 +363,7 @@ screenshots) and/or covered by unit tests, including render-based checks (36 tes
 | Viewing | F1–F6, F8 | Done, verified. A 300-page file is shown in ~0.6 s and uses ~260 MB. Password prompt with retry verified. |
 | Search | F7 | Not started (P2). |
 | Page operations | F9–F14 | Done, verified: drag & drop including multi-select, Alt+↑/↓, rotate, delete, insert by drop, undo/redo. |
-| Extract / split, blank page | F15–F16 | Not started (P2). |
+| Extract / split, blank page | F15–F16 | Extract selected pages and split into one file per page done (⋯ menu, open document unchanged); blank page not started (P2). |
 | Combine | F17–F20, F22–F23 | Done, verified: natural sort, damaged/password files flagged, opens next to an open document. F21 (images) is P2. |
 | Text tools | F24–F27a | Done, verified: both kinds, move by handle, size/colour, convert, rotated pages. "Resize" is the font size (text boxes do not wrap). |
 | Re-edit annotations | F27b | Not started (P2). |

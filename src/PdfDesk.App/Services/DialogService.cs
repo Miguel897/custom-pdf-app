@@ -27,6 +27,9 @@ public interface IDialogService
     /// <summary>Returns the chosen path, or null if the user cancelled.</summary>
     string? AskSavePath(string? folder, string fileName);
 
+    /// <summary>Returns the chosen folder, or null if the user cancelled.</summary>
+    string? AskFolder(string? folder);
+
     /// <summary>Returns the password, or null if the user cancelled.</summary>
     string? AskPassword(string fileName, bool retry);
 
@@ -78,6 +81,12 @@ public sealed class DialogService(Window owner) : IDialogService
             OverwritePrompt = true,
         };
         return dialog.ShowDialog(owner) == true ? dialog.FileName : null;
+    }
+
+    public string? AskFolder(string? folder)
+    {
+        var dialog = new OpenFolderDialog { InitialDirectory = folder ?? "", Title = "Choose a folder for the pages" };
+        return dialog.ShowDialog(owner) == true ? dialog.FolderName : null;
     }
 
     public string? AskPassword(string fileName, bool retry)

@@ -438,6 +438,101 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
         }
     }
 
+    /// <summary>Saves the selected pages (or the current page) as a new PDF; the open document is not changed.</summary>
+    [RelayCommand]
+    private async Task ExtractPagesAsync()
+    {
+        var targets = Targets();
+        if (targets.Count == 0)
+        {
+            return;
+        }
+
+        FlushEdits?.Invoke();
+        var numbers = Pages.Select((p, i) => (p, i)).Where(x => targets.Contains(x.p.Id)).Select(x => x.i + 1).ToList();
+        var target = _dialogs.AskSavePath(OutputFolder(), PageRanges.ExtractFileName(OutputBaseName(), numbers));
+        if (target is null)
+        {
+            return;
+        }
+
+        if (string.Equals(Path.GetFullPath(target), _document.FilePath is { } open ? Path.GetFullPath(open) : null, StringComparison.OrdinalIgnoreCase))
+        {
+            _dialogs.ShowError("This is the open file. To keep only these pages in it, delete the other pages and save.");
+            return;
+        }
+
+        var state = PageOperations.Keep(_document.State, targets);
+        if (await ExportAsync([(state, target)]))
+        {
+            Status = $"Saved page(s) {PageRanges.Format(numbers)} to {Path.GetFileName(target)}";
+        }
+    }
+
+    /// <summary>Saves every page as its own PDF in a chosen folder; the open document is not changed.</summary>
+    [RelayCommand]
+    private async Task SplitPagesAsync()
+    {
+        if (!HasDocument || _dialogs.AskFolder(OutputFolder()) is not { } folder)
+        {
+            return;
+        }
+
+        FlushEdits?.Invoke();
+        var state = _document.State;
+        var baseName = OutputBaseName();
+        var files = state.Pages
+            .Select((page, i) => (State: PageOperations.Keep(state, new HashSet<Guid> { page.Id }),
+                Path: Path.Combine(folder, PageRanges.SplitFileName(baseName, i + 1, state.Pages.Count))))
+            .ToList();
+
+        var existing = files.Count(f => File.Exists(f.Path));
+        if (existing > 0 && !_dialogs.Confirm($"{existing} of the {files.Count} files already exist in {folder}. Replace them?"))
+        {
+            return;
+        }
+
+        if (await ExportAsync(files))
+        {
+            App.Settings.LastFolder = folder;
+            Status = $"Saved {files.Count} files to {Path.GetFileName(folder)}";
+        }
+    }
+
+    private string? OutputFolder() =>
+        _document.FilePath is { } current ? Path.GetDirectoryName(current)
+            : Path.GetDirectoryName(_document.Sources.FirstOrDefault()?.Path) ?? App.Settings.LastFolder;
+
+    private string OutputBaseName() =>
+        _document.FilePath is { } path ? Path.GetFileNameWithoutExtension(path) : "Combined";
+
+    /// <summary>Saves new files from snapshots of the document (extract / split); shows the first error.</summary>
+    private async Task<bool> ExportAsync(IReadOnlyList<(DocumentState State, string Path)> files)
+    {
+        var sources = _document.Sources.ToList();
+        IsBusy = true;
+        try
+        {
+            await Task.Run(() =>
+            {
+                foreach (var (state, path) in files)
+                {
+                    PdfExporter.Save(sources, state, path);
+                }
+            });
+            return true;
+        }
+        catch (PdfSaveException ex)
+        {
+            _dialogs.ShowError(ex.Message);
+            return false;
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
     /// <summary>Returns true when the current document may be closed (saved, discarded or unchanged).</summary>
     public async Task<bool> ConfirmCloseAsync()
     {

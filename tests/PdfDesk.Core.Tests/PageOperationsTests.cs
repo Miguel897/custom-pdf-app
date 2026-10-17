@@ -23,6 +23,23 @@ public class PageOperationsTests
     }
 
     [Fact]
+    public void Keep_KeepsDocumentOrderEditsAndFormValues()
+    {
+        var overlay = new TextOverlay(Guid.NewGuid(), TextKind.Flattened, 10, 20, 0, "Hi", 11, "#000000");
+        var state = State(5);
+        state = PageOperations.Rotate(state, Ids(state, 3), 1);
+        state = PageOperations.AddOverlay(state, state.Pages[1].Id, overlay);
+        state = PageOperations.SetFormValue(state, new FieldKey(1, "name"), "Alex", "");
+
+        var kept = PageOperations.Keep(state, Ids(state, 3, 1));
+
+        Assert.Equal([1, 3], Order(kept));
+        Assert.Equal([overlay], kept.Pages[0].Overlays);
+        Assert.Equal(1, kept.Pages[1].Rotation);
+        Assert.Equal("Alex", kept.FormValues[new FieldKey(1, "name")]);
+    }
+
+    [Fact]
     public void Move_ToSamePlace_ReturnsSameInstance()
     {
         var state = State(3);

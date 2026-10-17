@@ -12,6 +12,8 @@ as the release notes and fails if it is missing.
 
 ### Added
 
+- **⋯ › Extract pages to new PDF…** saves the selected pages (or the current page) as a new file, and
+  **⋯ › Split into one PDF per page…** saves every page as its own file. The open document is not changed.
 - **F1** (or ⋯ › Keyboard shortcuts) lists all keyboard and mouse shortcuts.
 - README links to the public [roadmap](https://github.com/users/Miguel897/projects/2).
 

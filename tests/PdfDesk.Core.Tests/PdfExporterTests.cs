@@ -75,6 +75,20 @@ public sealed class PdfExporterTests : IDisposable
     }
 
     [Fact]
+    public async Task Keep_SavesOnlyTheChosenPages_AndLeavesTheSourceAlone()
+    {
+        var path = TestPdfs.Numbered(_dir, "a.pdf", 4);
+        using var doc = await OpenAsync(path);
+        doc.Apply(s => PageOperations.Rotate(s, Ids(doc, 3), 1));
+
+        var output = Path.Combine(_dir, "extract.pdf");
+        PdfExporter.Save(doc.Sources, PageOperations.Keep(doc.State, Ids(doc, 3, 1)), output);
+
+        Assert.Equal([(310.0, 500.0), (500.0, 330.0)], await TestPdfs.PageSizesAsync(output));
+        Assert.Equal(4, (await TestPdfs.PageSizesAsync(path)).Count);
+    }
+
+    [Fact]
     public async Task Save_OverwritesTheOpenSourceFile()
     {
         var path = TestPdfs.Numbered(_dir, "a.pdf", 3);
