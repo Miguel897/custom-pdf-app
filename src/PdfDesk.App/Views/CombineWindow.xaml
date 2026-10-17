@@ -4,6 +4,20 @@
         Title="Combine files" Width="720" Height="520" MinWidth="520" MinHeight="360"
         WindowStartupLocation="CenterOwner" ShowInTaskbar="False" ResizeMode="CanResizeWithGrip"
         Background="{StaticResource ChromeBrush}">
+    <Window.Resources>
+        <!-- Second line under a file name; takes no space when there is nothing to show. -->
+        <Style x:Key="SubLine" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="11" />
+            <Style.Triggers>
+                <Trigger Property="Text" Value="{x:Null}">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                </Trigger>
+                <Trigger Property="Text" Value="">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
     <Grid Margin="16">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -46,30 +60,10 @@
                         <GridViewColumn Header="File" Width="280">
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
-                                    <StackPanel>
+                                    <StackPanel VerticalAlignment="Center">
                                         <TextBlock Text="{Binding FileName}" />
-                                        <TextBlock Text="{Binding RelativeFolder}" FontSize="11" Foreground="{StaticResource SubtleTextBrush}">
-                                            <TextBlock.Style>
-                                                <Style TargetType="TextBlock">
-                                                    <Style.Triggers>
-                                                        <Trigger Property="Text" Value="">
-                                                            <Setter Property="Visibility" Value="Collapsed" />
-                                                        </Trigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </TextBlock.Style>
-                                        </TextBlock>
-                                        <TextBlock Text="{Binding Problem}" FontSize="11" Foreground="#B00020">
-                                            <TextBlock.Style>
-                                                <Style TargetType="TextBlock">
-                                                    <Style.Triggers>
-                                                        <Trigger Property="Text" Value="{x:Null}">
-                                                            <Setter Property="Visibility" Value="Collapsed" />
-                                                        </Trigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </TextBlock.Style>
-                                        </TextBlock>
+                                        <TextBlock Text="{Binding RelativeFolder}" Style="{StaticResource SubLine}" Foreground="{StaticResource SubtleTextBrush}" />
+                                        <TextBlock Text="{Binding Problem}" Style="{StaticResource SubLine}" Foreground="#B00020" />
                                     </StackPanel>
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>

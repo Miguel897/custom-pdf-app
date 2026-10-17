@@ -16,6 +16,10 @@ as the release notes and fails if it is missing.
   the app point there. Old links redirect.
 - README with screenshots; bug report and feature request forms; security policy.
 
+### Fixed
+
+- Combine dialog: file names are aligned with the other columns, and rows are no taller than needed.
+
 ## [0.2.0] - 2026-10-17
 
 ### Added
