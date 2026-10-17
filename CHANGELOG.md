@@ -10,6 +10,12 @@ as the release notes and fails if it is missing.
 
 ## [Unreleased]
 
+### Changed
+
+- The project moved to [github.com/Miguel897/pdfdesk](https://github.com/Miguel897/pdfdesk); links in
+  the app point there. Old links redirect.
+- README with screenshots; bug report and feature request forms; security policy.
+
 ## [0.2.0] - 2026-10-17
 
 ### Added

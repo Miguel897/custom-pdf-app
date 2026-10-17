@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | v1 implemented (2026-10-13), see §12 |
+| **Status** | v1 implemented (2026-10-13); released as v0.1.0, latest v0.2.0 — see §12 and [CHANGELOG](../CHANGELOG.md) |
 | **Date** | 2026-10-13 |
 | **Owner** | miguel |
 | **Platform** | Windows 11 (x64), .NET 10 LTS, WPF |
@@ -283,6 +283,9 @@ them (e.g. the IRS W-9: 140 KB) grow when saved in place (~265 KB).
 - "Open with" integration: per-user HKCU registration from Settings (F40). No installer in v1.
 - Release workflow: tag `v*` → test → publish → GitHub release (copy ScanDesk's), **plus** a
   build+test workflow on every push/PR and Dependabot (missing in ScanDesk).
+- Since v0.2.0 the version comes from the git tag (MinVer) and the release notes from the tag's
+  section in `CHANGELOG.md`. The exe embeds `THIRD-PARTY-NOTICES.txt` (shown in About), as the
+  bundled licenses require.
 
 ### 7.6 Dependency trust
 
@@ -340,7 +343,7 @@ Mitigations:
 | Q6 | Allow "Save" to overwrite the original file? | Yes, with atomic replace. Save As makes a copy with a new name/path (F33–F34). | **Decided** |
 | Q7 | Register as Windows PDF handler / "Open with"? | Per-user HKCU registration button, no installer (F40). | **Decided** |
 | Q8 | Printing? | Out of scope v1: "Open in default app" button. P2: print via PDFium render → `PrintDialog`. | **Decided** |
-| Q9 | App name. | "PdfDesk" (working name, matches ScanDesk). | **Decided** |
+| Q9 | App name. | "PdfDesk" (matches ScanDesk). Checked 2026-10-17: no product with this exact name found. Names containing "Win"/"Windows" were rejected, since Microsoft's trademark guidelines bar its marks in product names; "for Windows" is used as a description instead. Repository renamed to `pdfdesk`. | **Decided** |
 | Q10 | Shared code with ScanDesk (settings store, single-file publish, dialog service)? | Copy for now; extract a shared `Desk.Common` package only if a third app appears. | **Decided** |
 
 ## 11. Milestones
@@ -374,7 +377,8 @@ screenshots) and/or covered by unit tests, including render-based checks (36 tes
 | Saving | F31–F36 | Done, verified: in place over the opened file, Save As copy, combined document, atomic replace, close prompt. |
 | Crash recovery | F37 | Not started (P2). |
 | Settings, Open with | F38, F40 | Done; Open-with registration verified (registry written and removed). F39 (theme) is P2. |
-| Distribution | §7.5 | Single 66 MB `PdfDesk.exe`; document shown in ~1.0 s cold, 0.75 s warm. CI and release workflows and Dependabot added, not yet run on GitHub. |
+| Distribution | §7.5 | Single 66 MB `PdfDesk.exe`; document shown in ~1.0 s cold, 0.75 s warm. CI runs on every PR, Dependabot is active, and releases v0.1.0–v0.2.0 were published by the release workflow. |
+| Branding | — | App icon and About dialog (version, privacy statement, third-party notices) added in v0.2.0. Exe not code-signed yet (SmartScreen warns on first start). |
 
 Known limitations:
 - Thumbnails do not show typed text.
