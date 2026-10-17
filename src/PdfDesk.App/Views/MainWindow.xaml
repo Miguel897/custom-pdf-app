@@ -161,6 +161,8 @@
                         <MenuItem Header="Show PdfDesk in &quot;Open with&quot;" IsCheckable="False" IsChecked="{Binding IsOpenWithRegistered, Mode=OneWay}"
                                   Command="{Binding ToggleOpenWithCommand}" />
                         <MenuItem Header="Open log folder" Command="{Binding OpenLogFolderCommand}" />
+                        <Separator />
+                        <MenuItem Header="About PdfDesk" Command="{Binding ShowAboutCommand}" />
                     </MenuItem>
                 </Menu>
             </WrapPanel>

@@ -52,6 +52,11 @@ Good to know:
 - Saved copies of password-protected PDFs are not password-protected.
 - Typed text stays editable in PdfDesk until you close the document, even after saving.
 
+## Privacy
+
+PdfDesk works entirely offline. It has no telemetry, makes no network connections and needs no
+account. Your files never leave your PC. The only things it writes besides your PDFs are listed below.
+
 ## Where data is stored
 
 | What | Where |
@@ -96,3 +101,6 @@ Rendering uses [PDFium](https://pdfium.googlesource.com/pdfium/) (Chrome's PDF e
 ## License
 
 MIT, see [LICENSE](LICENSE).
+
+PdfDesk.exe bundles PDFium, PDFsharp, CommunityToolkit.Mvvm and the .NET runtime. Their licenses are
+in [THIRD-PARTY-NOTICES.txt](THIRD-PARTY-NOTICES.txt), also shown in the app under **⋯ › About PdfDesk**.

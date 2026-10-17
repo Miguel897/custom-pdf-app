@@ -32,6 +32,8 @@ public interface IDialogService
 
     /// <summary>Shows the Combine dialog; returns the ordered files, or null if cancelled.</summary>
     IReadOnlyList<string>? AskCombine();
+
+    void ShowAbout();
 }
 
 public sealed class DialogService(Window owner) : IDialogService
@@ -87,4 +89,6 @@ public sealed class DialogService(Window owner) : IDialogService
         var dialog = new CombineWindow { Owner = owner };
         return dialog.ShowDialog() == true ? dialog.ViewModel.Result : null;
     }
+
+    public void ShowAbout() => new AboutWindow { Owner = owner }.ShowDialog();
 }

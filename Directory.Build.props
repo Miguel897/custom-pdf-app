@@ -6,6 +6,7 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <Product>PdfDesk</Product>
     <Company>miguel</Company>
+    <Copyright>© 2026 Miguel</Copyright>
     <Version>0.1.1</Version>
     <!-- Exact package versions recorded in packages.lock.json; CI restores in locked mode. -->
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
